@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
 import { useAuth } from '@/lib/context/AuthContext';
-import { BookPlus, User, LogOut, MessageSquare, LayoutDashboard, Menu, X } from 'lucide-react';
+import { BookPlus, User, LogOut, MessageSquare, LayoutDashboard, Menu, X, BookMarked } from 'lucide-react';
 import { useState } from 'react';
 import { AuthModal } from '../auth/AuthModal';
 
@@ -60,6 +60,10 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
             <Link href="/" className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               تصفح الكتب
+            </Link>
+            <Link href="/requests" className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <BookMarked className="w-3.5 h-3.5" />
+              طلبات الكتب
             </Link>
             <Link href="/sell" className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               بيع كتابك
@@ -148,6 +152,7 @@ export function Header() {
         {mobileNavOpen && (
           <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-md px-4 py-3 space-y-1 animate-in slide-in-from-top-2 duration-200">
             <Link href="/" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">تصفح الكتب</Link>
+            <Link href="/requests" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors"><BookMarked className="w-4 h-4 text-primary" />طلبات الكتب</Link>
             <Link href="/sell" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-muted text-sm font-medium transition-colors">بيع كتابك</Link>
             {user && (
               <>

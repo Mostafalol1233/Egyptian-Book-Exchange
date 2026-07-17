@@ -10,6 +10,7 @@ import EditBookPage from './pages/EditBookPage';
 import DashboardPage from './pages/DashboardPage';
 import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
+import RequestsPage from './pages/RequestsPage';
 import NotFound from './pages/not-found';
 
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/chat" component={ChatPage} />
         <Route path="/chat/:id" component={ChatPage} />
         <Route path="/profile" component={ProfilePage} />
+        <Route path="/requests" component={RequestsPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
