@@ -18,3 +18,11 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+VITE_AI_CHAT_KEY = ""
+VITE_GOOGLE_CLIENT_ID = "240771472584-ijemrng2hgdka003u7dgq5e0gsaa13o8.apps.googleusercontent.com"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_q5nXl5vnp8pdbp064mvang_-VU750NY"
+VITE_SUPABASE_URL = "https://hivmapciasjbnyyisjyd.supabase.co"

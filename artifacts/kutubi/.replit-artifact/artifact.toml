@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "كُتُبي - منصة تبادل الكتب المدرسية"
+version = "1.0.0"
+id = "artifacts/kutubi"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22001
+
+[services.development]
+run = "pnpm --filter @workspace/kutubi run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kutubi", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/kutubi/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22001"
+BASE_PATH = "/"
