@@ -5,6 +5,24 @@ import { Send, Loader2, BookOpen } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'wouter';
 
+// Fire-and-forget: notify the OTHER person in the conversation by email.
+// If the API isn't configured, the endpoint returns { ok: false } silently.
+function notifyRecipient(payload: {
+  recipientId: string;
+  senderName: string;
+  bookTitle: string;
+  messagePreview: string;
+  chatUrl: string;
+}) {
+  fetch('/api/notify-seller', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {
+    // Completely silent — never block or alert the user
+  });
+}
+
 export function ChatWindow({ conversationId }: { conversationId: string }) {
   const { user } = useAuth();
   const { data: conversation, isLoading: convLoading } = useConversation(conversationId);
@@ -18,18 +36,38 @@ export function ChatWindow({ conversationId }: { conversationId: string }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !user) return;
-    
-    sendMessage.mutate({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      content: input.trim(),
-      is_read: false
-    });
-    
-    setInput('');
+    if (!input.trim() || !user || !conversation) return;
+
+    const content = input.trim();
+    setInput(''); // clear immediately for snappy UX
+
+    try {
+      await sendMessage.mutateAsync({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content,
+        is_read: false,
+      });
+
+      // Determine who should be notified (the other person in the conversation)
+      const recipientId =
+        user.id === conversation.buyer_id
+          ? conversation.seller_id
+          : conversation.buyer_id;
+
+      notifyRecipient({
+        recipientId,
+        senderName: user.user_metadata?.full_name ?? 'مستخدم',
+        bookTitle: conversation.books?.title ?? 'كتاب',
+        messagePreview: content.slice(0, 120),
+        chatUrl: `${window.location.origin}/chat/${conversationId}`,
+      });
+    } catch {
+      // Restore input if the Supabase insert failed
+      setInput(content);
+    }
   };
 
   if (convLoading || msgLoading) {

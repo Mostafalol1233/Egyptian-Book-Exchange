@@ -1,6 +1,6 @@
 import { Book } from '@/lib/hooks/useBooks';
 import { formatArabicDate, formatPrice } from '@/lib/utils/arabic';
-import { MapPin, Clock, BookOpen, GraduationCap, Tag, Eye, MessageCircle } from 'lucide-react';
+import { MapPin, Clock, BookOpen, GraduationCap, Tag, Eye, MessageCircle, Share2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +22,35 @@ export function BookCard({ book }: { book: Book }) {
       const phone = `20${book.profiles.whatsapp.replace(/^0+/, '')}`;
       const text = encodeURIComponent(`مرحباً، رأيت إعلانك عن كتاب "${book.title}" على كُتُبي وأريد الاستفسار.`);
       window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+    }
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const bookUrl = `${window.location.origin}/book/${book.id}`;
+    const priceStr = isFree ? 'مجاني 🎁' : `${book.price} جنيه`;
+    const condStr = book.condition === 'جديد' ? '✨ جديد' : book.condition;
+
+    const msg = [
+      `📚 *كتاب للبيع على كُتُبي!*`,
+      ``,
+      `📖 *${book.title}*`,
+      `🎓 ${book.subject} | ${book.grade}`,
+      `🏷️ ${condStr}`,
+      `💰 ${priceStr}`,
+      `📍 ${book.city}، ${book.governorate}`,
+      ``,
+      `👇 شوف الإعلان كامل:`,
+      bookUrl,
+    ].join('\n');
+
+    // Use native share API if available (mobile), fallback to WhatsApp web
+    if (navigator.share) {
+      navigator.share({ title: book.title, text: msg, url: bookUrl }).catch(() => {});
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     }
   };
 
@@ -63,25 +92,40 @@ export function BookCard({ book }: { book: Book }) {
             </span>
           </div>
 
-          {/* WhatsApp quick-contact on hover (only if seller has WhatsApp) */}
-          {book.profiles?.whatsapp && (
-            <button
-              onClick={handleWhatsApp}
-              className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md translate-y-1 group-hover:translate-y-0"
-              title="تواصل واتساب"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              واتساب
-            </button>
-          )}
+          {/* Hover actions — bottom strip */}
+          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between px-3 pb-3">
+            {/* WhatsApp quick-contact (bottom-right on hover) */}
+            {book.profiles?.whatsapp && (
+              <button
+                onClick={handleWhatsApp}
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md translate-y-1 group-hover:translate-y-0"
+                title="تواصل واتساب"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                واتساب
+              </button>
+            )}
 
-          {/* Views count */}
-          {book.views_count > 0 && (
-            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-1 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
-              <Eye className="w-3 h-3" />
-              {book.views_count}
+            {/* Right side: share + views */}
+            <div className="flex items-center gap-1.5 mr-auto">
+              {/* Views count */}
+              {book.views_count > 0 && (
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-1 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm translate-y-1 group-hover:translate-y-0">
+                  <Eye className="w-3 h-3" />
+                  {book.views_count}
+                </div>
+              )}
+
+              {/* Share button */}
+              <button
+                onClick={handleShare}
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 bg-white/90 hover:bg-white text-slate-700 text-xs font-bold p-1.5 rounded-full flex items-center shadow-md translate-y-1 group-hover:translate-y-0"
+                title="شارك الإعلان"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Content Area */}
