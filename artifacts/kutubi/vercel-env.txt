@@ -6,3 +6,4 @@ VITE_SUPABASE_URL=https://hivmapciasjbnyyisjyd.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_q5nXl5vnp8pdbp064mvang_-VU750NY
 VITE_GOOGLE_CLIENT_ID=240771472584-ijemrng2hgdka003u7dgq5e0gsaa13o8.apps.googleusercontent.com
 VITE_AI_CHAT_KEY=YOUR_GEMINI_API_KEY_HERE
+GOOGLE_CLIENT_SECRET=<انسخ القيمة من Google Cloud Console>
