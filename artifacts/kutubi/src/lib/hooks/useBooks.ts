@@ -10,6 +10,8 @@ export interface BookFilters {
   governorate?: string;
   city?: string;
   price?: 'free' | 'paid' | 'all';
+  condition?: string;
+  sort?: 'newest' | 'price_asc' | 'price_desc' | 'views';
 }
 
 export interface Book {
@@ -62,7 +64,14 @@ export function useBooks(filters: BookFilters = {}) {
       if (filters.price === 'free') query = query.eq('is_free', true);
       else if (filters.price === 'paid') query = query.eq('is_free', false);
       
+      if (filters.condition) query = query.eq('condition', filters.condition);
       if (filters.search) query = query.ilike('title', `%${filters.search}%`);
+
+      // Sort
+      if (filters.sort === 'price_asc') query = query.order('price', { ascending: true });
+      else if (filters.sort === 'price_desc') query = query.order('price', { ascending: false });
+      else if (filters.sort === 'views') query = query.order('views_count', { ascending: false });
+      else query = query.order('created_at', { ascending: false }); // newest (default)
 
       const { data, error } = await query;
       if (error) throw error;

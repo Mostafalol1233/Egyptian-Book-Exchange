@@ -6,6 +6,7 @@ import { Layout } from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import BookDetailPage from './pages/BookDetailPage';
 import SellPage from './pages/SellPage';
+import EditBookPage from './pages/EditBookPage';
 import DashboardPage from './pages/DashboardPage';
 import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
@@ -27,6 +28,7 @@ function Router() {
         <Route path="/" component={HomePage} />
         <Route path="/book/:id" component={BookDetailPage} />
         <Route path="/sell" component={SellPage} />
+        <Route path="/edit/:id" component={EditBookPage} />
         <Route path="/dashboard" component={DashboardPage} />
         <Route path="/chat" component={ChatPage} />
         <Route path="/chat/:id" component={ChatPage} />

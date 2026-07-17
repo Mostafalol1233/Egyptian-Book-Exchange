@@ -1,5 +1,5 @@
 import { BookFilters } from '@/lib/hooks/useBooks';
-import { SUBJECTS, GRADES, TRACKS, PUBLISHERS, EGYPT_GOVERNORATES } from '@/lib/utils/arabic';
+import { SUBJECTS, GRADES, TRACKS, PUBLISHERS, CONDITIONS, EGYPT_GOVERNORATES } from '@/lib/utils/arabic';
 import { Filter, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -16,13 +16,20 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
   };
 
   const clearFilters = () => {
-    onChange({ search: filters.search });
+    onChange({ search: filters.search, sort: filters.sort });
   };
 
-  const hasActiveFilters = Object.keys(filters).filter(k => k !== 'search').length > 0;
+  const hasActiveFilters = Object.keys(filters).filter(k => !['search', 'sort'].includes(k) && (filters as any)[k]).length > 0;
 
   const governorates = Object.keys(EGYPT_GOVERNORATES);
   const cities = filters.governorate ? EGYPT_GOVERNORATES[filters.governorate] : [];
+
+  const conditionColors: Record<string, string> = {
+    'جديد': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    'مستعمل بشكل خفيف': 'bg-blue-50 text-blue-700 border-blue-200',
+    'مستعمل': 'bg-amber-50 text-amber-700 border-amber-200',
+    'قديم': 'bg-slate-50 text-slate-600 border-slate-200',
+  };
 
   return (
     <>
@@ -42,17 +49,14 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
         </button>
       </div>
 
-      <div className={`
-        ${isOpen ? 'block' : 'hidden'} 
-        lg:block bg-card border border-border rounded-2xl p-5 sticky top-24
-      `}>
-        <div className="flex items-center justify-between mb-6">
+      <div className={`${isOpen ? 'block' : 'hidden'} lg:block bg-card border border-border rounded-2xl p-5 sticky top-24`}>
+        <div className="flex items-center justify-between mb-5">
           <h2 className="font-bold text-lg flex items-center gap-2 text-foreground">
             <Filter className="w-5 h-5 text-primary" />
             التصنيفات
           </h2>
           {hasActiveFilters && (
-            <button 
+            <button
               onClick={clearFilters}
               className="text-xs text-destructive hover:underline flex items-center gap-1"
             >
@@ -61,52 +65,65 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Price */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <label className="text-sm font-semibold text-foreground">السعر</label>
             <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="price" 
-                  checked={!filters.price || filters.price === 'all'} 
-                  onChange={() => updateFilter('price', 'all')}
-                  className="accent-primary w-4 h-4"
-                />
-                الكل
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="price" 
-                  checked={filters.price === 'paid'} 
-                  onChange={() => updateFilter('price', 'paid')}
-                  className="accent-primary w-4 h-4"
-                />
-                مدفوع (أقل من 100 جنيه)
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="price" 
-                  checked={filters.price === 'free'} 
-                  onChange={() => updateFilter('price', 'free')}
-                  className="accent-primary w-4 h-4"
-                />
-                مجاني فقط
-              </label>
+              {[
+                { value: 'all', label: 'الكل' },
+                { value: 'paid', label: 'مدفوع (أقل من 100 جنيه)' },
+                { value: 'free', label: 'مجاني فقط 🎁' },
+              ].map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio" name="price"
+                    checked={(!filters.price && opt.value === 'all') || filters.price === opt.value}
+                    onChange={() => updateFilter('price', opt.value as any)}
+                    className="accent-primary w-4 h-4"
+                  />
+                  {opt.label}
+                </label>
+              ))}
             </div>
           </div>
 
-          <div className="h-px bg-border w-full"></div>
+          <div className="h-px bg-border" />
+
+          {/* Condition */}
+          <div className="space-y-2.5">
+            <label className="text-sm font-semibold text-foreground">حالة الكتاب</label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => updateFilter('condition', undefined)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${!filters.condition ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary/50'}`}
+              >
+                الكل
+              </button>
+              {CONDITIONS.map(c => (
+                <button
+                  key={c}
+                  onClick={() => updateFilter('condition', filters.condition === c ? undefined : c)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                    filters.condition === c
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : `${conditionColors[c] || 'bg-background text-muted-foreground border-border'} hover:opacity-80`
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="h-px bg-border" />
 
           {/* Grade */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">الصف الدراسي</label>
-            <select 
-              value={filters.grade || ""}
-              onChange={(e) => updateFilter('grade', e.target.value || undefined)}
+            <select
+              value={filters.grade || ''}
+              onChange={e => updateFilter('grade', e.target.value || undefined)}
               className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">الكل</option>
@@ -115,11 +132,11 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           {/* Track */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">المسار التعليمي</label>
-            <select 
-              value={filters.track || ""}
-              onChange={(e) => updateFilter('track', e.target.value || undefined)}
+            <select
+              value={filters.track || ''}
+              onChange={e => updateFilter('track', e.target.value || undefined)}
               className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">الكل</option>
@@ -128,11 +145,11 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           {/* Subject */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">المادة</label>
-            <select 
-              value={filters.subject || ""}
-              onChange={(e) => updateFilter('subject', e.target.value || undefined)}
+            <select
+              value={filters.subject || ''}
+              onChange={e => updateFilter('subject', e.target.value || undefined)}
               className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">الكل</option>
@@ -141,11 +158,11 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           {/* Publisher */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">الناشر/السلسلة</label>
-            <select 
-              value={filters.publisher || ""}
-              onChange={(e) => updateFilter('publisher', e.target.value || undefined)}
+            <select
+              value={filters.publisher || ''}
+              onChange={e => updateFilter('publisher', e.target.value || undefined)}
               className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">الكل</option>
@@ -153,16 +170,16 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
             </select>
           </div>
 
-          <div className="h-px bg-border w-full"></div>
+          <div className="h-px bg-border" />
 
           {/* Location */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">المحافظة</label>
-            <select 
-              value={filters.governorate || ""}
-              onChange={(e) => {
+            <select
+              value={filters.governorate || ''}
+              onChange={e => {
                 updateFilter('governorate', e.target.value || undefined);
-                updateFilter('city', undefined); // Reset city when gov changes
+                updateFilter('city', undefined);
               }}
               className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
@@ -172,11 +189,11 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           </div>
 
           {filters.governorate && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">المدينة / المنطقة</label>
-              <select 
-                value={filters.city || ""}
-                onChange={(e) => updateFilter('city', e.target.value || undefined)}
+              <select
+                value={filters.city || ''}
+                onChange={e => updateFilter('city', e.target.value || undefined)}
                 className="w-full bg-background border border-input rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               >
                 <option value="">كل المدن</option>
