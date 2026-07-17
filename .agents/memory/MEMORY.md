@@ -1,0 +1,2 @@
+- [Supabase URL env var](supabase-env-quirk.md) — use VITE_SUPABASE_URL (plain env var) for server-side Supabase calls; user-added SUPABASE_URL secret had a bad value
+- [API server notify endpoint](notify-endpoint.md) — POST /api/notify-seller sends email via Resend; pino redacts secrets in logs so use urlLength/urlPrefix for URL debugging

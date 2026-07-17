@@ -3,10 +3,23 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
-const SUPABASE_URL            = process.env["SUPABASE_URL"]            ?? "";
-const SUPABASE_SERVICE_KEY    = process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "";
-const RESEND_API_KEY          = process.env["RESEND_API_KEY"]          ?? "";
-const FROM_EMAIL              = process.env["NOTIFY_FROM_EMAIL"]       ?? "onboarding@resend.dev";
+// Normalise SUPABASE_URL — strip ALL whitespace (hidden chars from copy-paste),
+// add https:// if user pasted the bare domain
+function normaliseUrl(raw: string): string {
+  // Remove every whitespace/control character, not just leading/trailing
+  const s = raw.replace(/\s/g, "").replace(/[^\x20-\x7E]/g, "").replace(/\/+$/, "").trim();
+  if (!s) return "";
+  if (/^https?:\/\//i.test(s)) return s;
+  return `https://${s}`;
+}
+// VITE_SUPABASE_URL is already a verified plain env var — use it as primary source.
+// SUPABASE_URL secret is accepted as an override only if VITE_SUPABASE_URL is absent.
+const SUPABASE_URL         = normaliseUrl(
+  process.env["VITE_SUPABASE_URL"] ?? process.env["SUPABASE_URL"] ?? ""
+);
+const SUPABASE_SERVICE_KEY = (process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "").trim();
+const RESEND_API_KEY       = (process.env["RESEND_API_KEY"]           ?? "").trim();
+const FROM_EMAIL           = (process.env["NOTIFY_FROM_EMAIL"]        ?? "onboarding@resend.dev").trim();
 const APP_NAME                = "كُتُبي";
 
 // ── Email HTML builder ────────────────────────────────────────────────────────
@@ -92,11 +105,26 @@ function buildHtml({
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────
+// Validate SUPABASE_URL once at module load so we catch bad values early
+let supabaseUrlValid = false;
+try {
+  if (SUPABASE_URL) {
+    new URL(SUPABASE_URL);
+    supabaseUrlValid = true;
+  }
+} catch {
+  logger.error(
+    { urlLength: SUPABASE_URL.length, urlPrefix: SUPABASE_URL.slice(0, 8) },
+    "SUPABASE_URL secret is not a valid URL — check the value in Replit Secrets"
+  );
+}
+
 router.post("/notify-seller", async (req, res) => {
   // Silently succeed if not configured — don't block the user's chat flow
-  if (!RESEND_API_KEY || !SUPABASE_SERVICE_KEY || !SUPABASE_URL) {
-    logger.info("notify-seller: skipped (not configured)");
-    return res.json({ ok: false, reason: "not_configured" });
+  if (!RESEND_API_KEY || !SUPABASE_SERVICE_KEY || !SUPABASE_URL || !supabaseUrlValid) {
+    logger.info({ supabaseUrlValid, hasResend: !!RESEND_API_KEY, hasServiceKey: !!SUPABASE_SERVICE_KEY },
+      "notify-seller: skipped (not configured or invalid URL)");
+    return res.json({ ok: false, reason: supabaseUrlValid ? "not_configured" : "invalid_supabase_url" });
   }
 
   const { recipientId, senderName, bookTitle, messagePreview, chatUrl } =
