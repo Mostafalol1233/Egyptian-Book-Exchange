@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0d6b6b"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="white" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="1050" cy="100" r="200" fill="white" opacity="0.04"/>
+  <circle cx="150" cy="530" r="160" fill="white" opacity="0.04"/>
+  <circle cx="1100" cy="500" r="120" fill="white" opacity="0.03"/>
+
+  <!-- Logo mark -->
+  <g transform="translate(490, 110)">
+    <rect width="220" height="220" rx="48" fill="white" opacity="0.15"/>
+    <!-- Book left page -->
+    <path d="M110 46 L40 64 L40 150 L110 132 Z" fill="white" opacity="0.95"/>
+    <!-- Book right page -->
+    <path d="M110 46 L180 28 L180 110 L110 132 Z" fill="white" opacity="0.72"/>
+    <!-- Exchange arrow -->
+    <path d="M65 166 Q110 183 155 166" stroke="white" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <polyline points="148,152 155,166 164,160" stroke="white" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- App name -->
+  <text x="600" y="400" font-family="Cairo, Tajawal, Arial, sans-serif" font-size="100" font-weight="800" fill="white" text-anchor="middle" opacity="0.97">كُتُبي</text>
+
+  <!-- Tagline -->
+  <text x="600" y="480" font-family="Cairo, Tajawal, Arial, sans-serif" font-size="38" font-weight="500" fill="white" text-anchor="middle" opacity="0.75">منصة تبادل الكتب المدرسية في مصر</text>
+
+  <!-- URL -->
+  <text x="600" y="570" font-family="monospace, Arial, sans-serif" font-size="26" fill="white" text-anchor="middle" opacity="0.45">books-ex.vercel.app</text>
+</svg>
