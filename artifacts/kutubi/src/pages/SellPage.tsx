@@ -169,7 +169,7 @@ export default function SellPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold">الناشر/السلسلة <span className="text-destructive">*</span></label>
+              <label className="text-sm font-semibold">المدرس/الناشر أو السلسلة <span className="text-destructive">*</span></label>
               <select value={publisher} onChange={e => setPublisher(e.target.value)} className="w-full bg-background border border-input rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-1">
                 {PUBLISHERS.map(p => <option key={p} value={p}>{p}</option>)}
               </select>

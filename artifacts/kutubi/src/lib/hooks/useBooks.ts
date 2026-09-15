@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../supabase';
+import { filterFeaturedBooks, getFeaturedBook } from '../featuredBooks';
 
 export interface BookFilters {
   search?: string;
@@ -34,6 +35,7 @@ export interface Book {
   views_count: number;
   created_at: string;
   updated_at: string;
+  is_catalog?: boolean;
   profiles?: {
     full_name: string;
     avatar_url: string;
@@ -51,8 +53,7 @@ export function useBooks(filters: BookFilters = {}) {
       let query = supabase
         .from('books')
         .select('*, profiles(full_name, avatar_url, governorate, city, phone, whatsapp)')
-        .eq('is_sold', false)
-        .order('created_at', { ascending: false });
+        .eq('is_sold', false);
 
       if (filters.subject) query = query.eq('subject', filters.subject);
       if (filters.grade) query = query.eq('grade', filters.grade);
@@ -65,7 +66,10 @@ export function useBooks(filters: BookFilters = {}) {
       else if (filters.price === 'paid') query = query.eq('is_free', false);
       
       if (filters.condition) query = query.eq('condition', filters.condition);
-      if (filters.search) query = query.ilike('title', `%${filters.search}%`);
+      if (filters.search) {
+        const search = `%${filters.search.trim()}%`;
+        query = query.or(`title.ilike.${search},subject.ilike.${search},publisher.ilike.${search}`);
+      }
 
       // Sort
       if (filters.sort === 'price_asc') query = query.order('price', { ascending: true });
@@ -74,8 +78,10 @@ export function useBooks(filters: BookFilters = {}) {
       else query = query.order('created_at', { ascending: false }); // newest (default)
 
       const { data, error } = await query;
-      if (error) throw error;
-      return data as Book[];
+      if (error) return filterFeaturedBooks(filters);
+      const remoteBooks = data as Book[];
+      const remoteIds = new Set(remoteBooks.map((book) => book.id));
+      return [...filterFeaturedBooks(filters).filter((book) => !remoteIds.has(book.id)), ...remoteBooks];
     }
   });
 }
@@ -84,6 +90,9 @@ export function useBook(id: string) {
   return useQuery({
     queryKey: ['book', id],
     queryFn: async () => {
+      const featuredBook = getFeaturedBook(id);
+      if (featuredBook) return featuredBook;
+
       const { data, error } = await supabase
         .from('books')
         .select('*, profiles(*)')
