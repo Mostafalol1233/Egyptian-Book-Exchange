@@ -4,7 +4,7 @@ import { SearchBar } from '@/components/books/SearchBar';
 import { FilterPanel } from '@/components/books/FilterPanel';
 import { BookGrid } from '@/components/books/BookGrid';
 import { AIAssistant } from '@/components/ai/AIAssistant';
-import { ArrowUpDown, BookOpen, Gift, MapPin } from 'lucide-react';
+import { ArrowUpDown, BookOpen, FlaskConical, Gift, MapPin, PenLine } from 'lucide-react';
 import { Link } from 'wouter';
 
 const SORT_OPTIONS = [
@@ -17,7 +17,7 @@ const SORT_OPTIONS = [
 export default function HomePage() {
   const [filters, setFilters] = useState<BookFilters>({ sort: 'newest' });
 
-  const { data: books, isLoading } = useBooks(filters);
+  const { data: books, isLoading, isError, error } = useBooks(filters);
 
   const handleSearch = (search: string) => {
     setFilters(prev => ({ ...prev, search }));
@@ -32,6 +32,16 @@ export default function HomePage() {
   };
 
   const freeCount = books?.filter(b => b.is_free).length ?? 0;
+
+  const showTeacherCollection = (subject: string, publisher: string) => {
+    setFilters(prev => ({
+      ...prev,
+      subject,
+      publisher,
+      search: undefined,
+    }));
+    window.scrollTo({ top: 540, behavior: 'smooth' });
+  };
 
   return (
     <div className="flex-1 flex flex-col">
@@ -79,6 +89,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Teacher collections */}
+      <section className="container mx-auto px-4 pt-8">
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.03] p-5 md:p-6">
+          <div className="mb-4">
+            <p className="text-sm font-bold text-primary">مجموعات المدرسين</p>
+            <h2 className="mt-1 text-xl font-extrabold text-foreground">كتب الكيمياء واللغة العربية</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              كل كتب الكيمياء التي نزلت من د. جوزيف عادل، وكل كتب العربي التي نزلت من الأستاذ محمد صلاح.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => showTeacherCollection('الكيمياء', 'جوزيف عادل')}
+              className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-right transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
+            >
+              <span className="rounded-lg bg-sky-100 p-2.5 text-sky-700"><FlaskConical className="h-5 w-5" /></span>
+              <span>
+                <span className="block font-bold text-foreground">كتب الكيمياء</span>
+                <span className="text-xs text-muted-foreground">كل الكتب التي نزلت من د. جوزيف عادل</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => showTeacherCollection('اللغة العربية', 'محمد صلاح')}
+              className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-right transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
+            >
+              <span className="rounded-lg bg-amber-100 p-2.5 text-amber-700"><PenLine className="h-5 w-5" /></span>
+              <span>
+                <span className="block font-bold text-foreground">كتب اللغة العربية</span>
+                <span className="text-xs text-muted-foreground">كل الكتب التي نزلت من الأستاذ محمد صلاح</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Banner (non-logged-in friendly) */}
       <section className="bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
@@ -122,7 +169,16 @@ export default function HomePage() {
                 </select>
               </div>
             </div>
-            <BookGrid books={books} isLoading={isLoading} />
+            {isError ? (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+                <h3 className="font-bold text-destructive">تعذر تحميل الكتب الآن</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {error instanceof Error ? error.message : 'تحقق من اتصال قاعدة البيانات ثم أعد المحاولة.'}
+                </p>
+              </div>
+            ) : (
+              <BookGrid books={books} isLoading={isLoading} />
+            )}
           </div>
 
         </div>

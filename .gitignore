@@ -47,3 +47,7 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Supplied book covers are uploaded to Supabase Storage; keep binary JPEGs out
+# of Git so pull requests can be created on hosts without binary support.
+artifacts/kutubi/public/book-covers/*.jpg
