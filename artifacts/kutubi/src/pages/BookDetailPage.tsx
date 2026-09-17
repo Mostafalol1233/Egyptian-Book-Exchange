@@ -26,6 +26,7 @@ export default function BookDetailPage() {
   }
 
   const isFree = book.is_free || book.price === 0;
+  const isCatalog = book.is_catalog === true;
   const isOwner = user?.id === book.seller_id;
 
   const handleContactSeller = () => {
@@ -81,7 +82,7 @@ export default function BookDetailPage() {
             )}
             <div className="absolute top-4 right-4 flex gap-2">
               <span className={`px-4 py-1.5 rounded-full text-sm font-bold shadow-md backdrop-blur-md ${isFree ? 'bg-green-500 text-white' : 'bg-white text-slate-800'}`}>
-                {formatPrice(book.price, book.is_free)}
+                {isCatalog ? 'كتالوج' : formatPrice(book.price, book.is_free)}
               </span>
             </div>
           </div>
@@ -127,7 +128,7 @@ export default function BookDetailPage() {
               </span>
             </div>
             <div className="bg-muted/50 p-4 rounded-xl">
-              <span className="block text-xs text-muted-foreground mb-1">الناشر</span>
+              <span className="block text-xs text-muted-foreground mb-1">المدرس/الناشر</span>
               <span className="font-semibold flex items-center gap-2">
                 <Tag className="w-4 h-4 text-primary" /> {book.publisher}
               </span>
@@ -150,6 +151,12 @@ export default function BookDetailPage() {
             </div>
           )}
           
+          {book.is_catalog && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
+              هذا كتاب مضاف إلى كتالوج كُتُبي. السعر والتوفر يحددهما البائع عند إضافة نسخة للبيع.
+            </div>
+          )}
+
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <ShieldCheck className="w-4 h-4 text-green-500" />
             تأكد من معاينة الكتاب قبل الدفع. المنصة غير مسؤولة عن عمليات الدفع الخارجية.
@@ -161,30 +168,36 @@ export default function BookDetailPage() {
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm sticky top-24">
             
             <div className="flex justify-between items-start mb-6">
-              <h3 className="font-bold text-lg">معلومات البائع</h3>
+              <h3 className="font-bold text-lg">{book.is_catalog ? 'كتالوج كُتُبي' : 'معلومات البائع'}</h3>
               <button onClick={handleShare} className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground" title="مشاركة">
                 <Share2 className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary text-xl font-bold overflow-hidden">
-                {book.profiles?.avatar_url ? (
-                  <img src={book.profiles.avatar_url} className="w-full h-full object-cover" />
-                ) : (
-                  book.profiles?.full_name?.charAt(0) || 'U'
-                )}
-              </div>
-              <div>
-                <h4 className="font-bold text-foreground text-lg">{book.profiles?.full_name}</h4>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>{book.profiles?.city}، {book.profiles?.governorate}</span>
+            {!book.is_catalog && (
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary text-xl font-bold overflow-hidden">
+                  {book.profiles?.avatar_url ? (
+                    <img src={book.profiles.avatar_url} className="w-full h-full object-cover" />
+                  ) : (
+                    book.profiles?.full_name?.charAt(0) || 'U'
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground text-lg">{book.profiles?.full_name}</h4>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>{book.profiles?.city}، {book.profiles?.governorate}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {book.is_sold ? (
+            {book.is_catalog ? (
+              <div className="bg-primary/10 text-primary text-center py-4 rounded-xl font-bold border border-primary/20">
+                كتاب كتالوج — غير متاح للبيع مباشرةً
+              </div>
+            ) : book.is_sold ? (
               <div className="bg-destructive/10 text-destructive text-center py-4 rounded-xl font-bold">
                 تم بيع هذا الكتاب
               </div>

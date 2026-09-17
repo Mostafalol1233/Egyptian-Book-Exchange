@@ -13,6 +13,7 @@ const conditionConfig: Record<string, { label: string; color: string }> = {
 
 export function BookCard({ book }: { book: Book }) {
   const isFree = book.is_free || book.price === 0;
+  const isCatalog = book.is_catalog === true;
   const cond = conditionConfig[book.condition] ?? { label: book.condition, color: 'bg-slate-500/90 text-white' };
 
   const handleWhatsApp = (e: React.MouseEvent) => {
@@ -30,11 +31,11 @@ export function BookCard({ book }: { book: Book }) {
     e.stopPropagation();
 
     const bookUrl = `${window.location.origin}/book/${book.id}`;
-    const priceStr = isFree ? 'مجاني 🎁' : `${book.price} جنيه`;
+    const priceStr = isCatalog ? 'كتالوج' : isFree ? 'مجاني 🎁' : `${book.price} جنيه`;
     const condStr = book.condition === 'جديد' ? '✨ جديد' : book.condition;
 
     const msg = [
-      `📚 *كتاب للبيع على كُتُبي!*`,
+      `📚 *${isCatalog ? 'كتاب في كتالوج كُتُبي' : 'كتاب للبيع على كُتُبي'}*`,
       ``,
       `📖 *${book.title}*`,
       `🎓 ${book.subject} | ${book.grade}`,
@@ -81,7 +82,7 @@ export function BookCard({ book }: { book: Book }) {
                 ? "bg-green-500/95 text-white"
                 : "bg-white/95 text-slate-800"
             )}>
-              {formatPrice(book.price, book.is_free)}
+              {isCatalog ? 'كتالوج' : formatPrice(book.price, book.is_free)}
             </span>
           </div>
 

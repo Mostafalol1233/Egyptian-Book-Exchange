@@ -159,7 +159,7 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
 
           {/* Publisher */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">الناشر/السلسلة</label>
+            <label className="text-sm font-semibold text-foreground">المدرس/الناشر أو السلسلة</label>
             <select
               value={filters.publisher || ''}
               onChange={e => updateFilter('publisher', e.target.value || undefined)}
